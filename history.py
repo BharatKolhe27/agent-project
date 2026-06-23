@@ -1,7 +1,8 @@
 conversation_history = []
 
 MAX_HISTORY = 10
-
+# summary = ""
+# summarize_history()   
 
 def get_messages():
 
