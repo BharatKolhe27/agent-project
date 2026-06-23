@@ -3,9 +3,28 @@ def detect_loop(trace):
     if len(trace) < 3:
         return False
 
-    last = [
-        x["tool"]
-        for x in trace[-3:]
-    ]
+    last_three = trace[-3:]
 
-    return len(set(last)) == 1
+    same_tool = (
+        len(
+            set(
+                x["tool"]
+                for x in last_three
+            )
+        ) == 1
+    )
+
+    same_args = (
+        len(
+            set(
+                str(x["args"])
+                for x in last_three
+            )
+        ) == 1
+    )
+
+    return (
+        same_tool
+        and
+        same_args
+    )

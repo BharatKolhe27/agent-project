@@ -2,7 +2,11 @@ import json
 import time
 
 from planner import plan
+from loop_detector import (
+    detect_loop
+)
 
+from metrics import Metrics
 from executor import (
     execute_action,
     TOOLS
@@ -22,7 +26,7 @@ def run_agent(
     question,
     max_steps=5
 ):
-
+    metrics = Metrics()
     messages = get_messages()
 
     messages.append(
@@ -36,6 +40,7 @@ def run_agent(
 
     for step in range(max_steps):
 
+        metrics.add_llm_call()
         decision = plan(
             messages
         )
@@ -64,17 +69,24 @@ def run_agent(
             return {
                 "answer":
                     decision.answer,
-                "trace":
-                    trace
-            }
 
+                "trace":
+                    trace,
+
+                "metrics":
+                    metrics.to_dict()
+            }
         if decision.action not in TOOLS:
 
-            return {
+          return {
                 "answer":
-                    "Unknown tool",
+                    decision.answer,
+
                 "trace":
-                    trace
+                    trace,
+
+                "metrics":
+                    metrics.to_dict()
             }
 
         if not validate_action(
@@ -84,13 +96,19 @@ def run_agent(
 
             return {
                 "answer":
-                    "Validation failed",
+                    decision.answer,
+
                 "trace":
-                    trace
+                    trace,
+
+                "metrics":
+                    metrics.to_dict()
             }
 
         start = time.time()
 
+        metrics.add_tool_call()
+        
         result = execute_action(
             decision.action,
             decision.args
@@ -99,25 +117,31 @@ def run_agent(
         latency = (
             time.time() - start
         )
-
-        trace.append(
-            {
-                "step": step,
-                "reasoning":
-                    decision.reasoning,
-                "tool":
-                    decision.action,
-                "args":
-                    decision.args,
-                "result":
-                    result,
-                "latency":
-                    round(
-                        latency,
-                        3
+        metrics.add_latency(
+                        latency
                     )
+        trace.append(
+        {
+            "step": step,
+            "reasoning": decision.reasoning,
+            "tool": decision.action,
+            "args": decision.args,
+            "result": result
+        }
+    )
+        
+        if detect_loop(trace):
+
+            return {
+                "answer":
+                    decision.answer,
+
+                "trace":
+                    trace,
+
+                "metrics":
+                    metrics.to_dict()
             }
-        )
 
         messages.append(
             {
@@ -142,7 +166,11 @@ def run_agent(
 
     return {
         "answer":
-            "Max steps reached",
+            decision.answer,
+
         "trace":
-            trace
-    }
+            trace,
+
+        "metrics":
+             metrics.to_dict()
+        }

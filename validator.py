@@ -9,7 +9,7 @@ def validate_action(
 
         return (
             isinstance(city, str)
-            and city.strip()
+            and city.strip()    
         )
 
     if action == "save_memory":
