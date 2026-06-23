@@ -9,8 +9,7 @@ The project demonstrates how modern AI agents plan actions, call tools, reason a
 # 🎥 Demo Video
 
 Demo Video:
-
-[▶️ Watch Demo](videos/agent-demo.webm)
+videos/agent-demo.webm
 
 > After pushing to GitHub, upload the video directly to GitHub and replace the link above with the generated GitHub video URL for a better viewing experience.
 
