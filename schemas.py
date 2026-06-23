@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Dict, Any, Literal
 
 
@@ -12,6 +12,8 @@ class AgentDecision(BaseModel):
         "final"
     ]
 
-    args: Dict[str, Any] = {}
+    args: Dict[str, Any] = Field(default_factory=dict)
 
-    answer: str | None = None
+    answer: str = ""
+
+    reasoning: str = ""
