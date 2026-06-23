@@ -12,7 +12,9 @@ class AgentDecision(BaseModel):
         "final"
     ]
 
-    args: Dict[str, Any] = Field(default_factory=dict)
+    args: Dict[str, Any] = Field(
+        default_factory=dict
+    )
 
     answer: str = ""
 

@@ -1,166 +1,36 @@
-from dotenv import load_dotenv
-
-load_dotenv()
-
+import json
 import time
 
-from langchain_google_genai import (
-    ChatGoogleGenerativeAI
+from planner import plan
+
+from executor import (
+    execute_action,
+    TOOLS
 )
 
-from schemas import AgentDecision
-
-from tools.weather import get_weather
-
-from tools.memory import (
-    save_memory,
-    get_memory
+from validator import (
+    validate_action
 )
 
-from tools.notes import (
-    create_note
+from history import (
+    get_messages,
+    save_messages
 )
 
-
-# -------------------
-# LLM
-# -------------------
-
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-flash",
-    temperature=0
-)
-
-planner = llm.with_structured_output(
-    AgentDecision
-)
-
-
-# -------------------
-# TOOLS
-# -------------------
-
-TOOLS = {
-    "get_weather": get_weather,
-    "save_memory": save_memory,
-    "get_memory": get_memory,
-    "create_note": create_note
-}
-
-
-# -------------------
-# SYSTEM PROMPT
-# -------------------
-SYSTEM_PROMPT = """
-You are a helpful AI assistant.
-
-You have access to tools.
-
-Always choose the most appropriate tool.
-
-Rules:
-
-- Use tools whenever external information
-  is required.
-
-- Use memory tools for user preferences
-  and previously stored information.
-
-- Use note tools for note creation.
-
-- Use weather tools for weather questions.
-
-- Never invent memory.
-
-- Only use final when you have enough
-  information to answer the user.
-"""
-
-# -------------------
-# PLANNER
-# -------------------
-
-def plan(messages):
-
-    history = "\n".join(
-        [
-            f"{m['role']}: {m['content']}"
-            for m in messages
-        ]
-    )
-
-    return planner.invoke(
-        f"""
-{SYSTEM_PROMPT}
-
-Conversation:
-
-{history}
-"""
-    )
-
-
-# -------------------
-# VALIDATOR
-# -------------------
-
-def validate_action(
-    action,
-    args
-):
-
-    if action == "get_weather":
-
-        return "city" in args
-
-    if action == "save_memory":
-
-        return (
-            "key" in args
-            and
-            "value" in args
-        )
-
-    if action == "get_memory":
-
-        return "key" in args
-
-    if action == "create_note":
-
-        return "text" in args
-
-    return True
-
-
-# -------------------
-# EXECUTOR
-# -------------------
-
-def execute_action(
-    action,
-    args
-):
-
-    return TOOLS[action](
-        **args
-    )
-
-
-# -------------------
-# AGENT LOOP
-# -------------------
 
 def run_agent(
     question,
     max_steps=5
 ):
 
-    messages = [
+    messages = get_messages()
+
+    messages.append(
         {
             "role": "user",
             "content": question
         }
-    ]
+    )
 
     trace = []
 
@@ -174,11 +44,22 @@ def run_agent(
             f"\nSTEP {step}"
         )
 
-        print(
-            decision
-        )
+        print(decision)
 
         if decision.action == "final":
+
+            messages.append(
+                {
+                    "role":
+                        "assistant",
+                    "content":
+                        decision.answer
+                }
+            )
+
+            save_messages(
+                messages
+            )
 
             return {
                 "answer":
@@ -191,8 +72,7 @@ def run_agent(
 
             return {
                 "answer":
-                    f"Unknown tool "
-                    f"{decision.action}",
+                    "Unknown tool",
                 "trace":
                     trace
             }
@@ -253,7 +133,10 @@ def run_agent(
                 "role":
                     "tool",
                 "content":
-                    str(result)
+                    json.dumps(
+                        result,
+                        indent=2
+                    )
             }
         )
 
