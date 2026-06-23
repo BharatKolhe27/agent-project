@@ -5,6 +5,25 @@ MEMORY_FILE = "memory.json"
 
 
 def save_memory(key: str, value: str):
+    """
+    Save user information permanently.
+
+    Use when user says:
+
+    - Remember this
+    - Save this
+    - Don't forget
+    - My favorite ...
+    - Store this information
+
+    Examples:
+
+    User:
+    Remember my favorite language is Spanish
+
+    User:
+    Save my favorite city as Pune
+    """
 
     if not key or not value:
 
@@ -40,7 +59,25 @@ def save_memory(key: str, value: str):
 
 
 def get_memory(key: str):
+    """
+    Retrieve previously saved user information.
 
+    Use when user asks:
+
+    - What is my ...
+    - What's my ...
+    - Do you remember ...
+    - What did I tell you ...
+    - Favorite ...
+
+    Examples:
+
+    User:
+    What is my favorite language?
+
+    User:
+    Do you remember my favorite city?
+    """
     with open(
         MEMORY_FILE,
         "r"

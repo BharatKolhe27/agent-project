@@ -18,7 +18,43 @@ if not os.path.exists(
 
 
 def create_note(text: str):
+    """
+    Create and save a note.
 
+    Use when the user wants something
+    written down for later reference.
+
+    Trigger phrases:
+
+    - Create a note
+    - Save a note
+    - Write this down
+    - Take a note
+    - Remember this note
+
+    Examples:
+
+    User:
+    Create a note saying learn LangGraph.
+
+    User:
+    Write down buy groceries tomorrow.
+
+    User:
+    Save a note about project ideas.
+
+    Required Arguments:
+
+    text:
+        Note content.
+
+    Returns:
+
+    {
+        "status": "success",
+        "message": "note created"
+    }
+    """
     if not text:
 
         return {

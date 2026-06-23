@@ -2,7 +2,48 @@ import requests
 
 
 def get_weather(city: str):
+    """
+    Get the current weather for a city.
 
+    Use when the user asks about:
+
+    - Weather
+    - Temperature
+    - Climate
+    - Forecast
+    - Current conditions
+
+    Examples:
+
+    User:
+    What's the weather in Pune?
+
+    User:
+    Tell me the temperature in Mumbai.
+
+    User:
+    Is it hot in Delhi today?
+
+    Required Arguments:
+
+    city:
+        Name of the city.
+
+    Returns:
+
+    {
+        "status": "success",
+        "city": "Pune",
+        "temperature": 26.3
+    }
+
+    or
+
+    {
+        "status": "error",
+        "message": "city not found"
+    }
+    """
     if not city or not city.strip():
 
         return {
